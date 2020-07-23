@@ -1,0 +1,29 @@
+{
+  "name": "@recent-cli/jumplist-parser-lite",
+  "version": "0.0.1-alpha",
+  "description": "",
+  "main": "src/index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "files": [
+    "src/"
+  ],
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ashbeats/jumplist-parser-lite.git"
+  },
+  "keywords": [
+    "jumplist"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ashbeats/jumplist-parser-lite/issues"
+  },
+  "homepage": "https://github.com/ashbeats/jumplist-parser-lite#readme"
+}
