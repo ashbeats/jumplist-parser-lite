@@ -28,9 +28,11 @@
   "homepage": "https://github.com/ashbeats/jumplist-parser-lite#readme",
   "devDependencies": {
     "dumper.js": "^1.3.1",
-    "jest": "^26.1.0"
+    "jest": "^26.1.0",
+    "fetch": "^1.1.0"
   },
   "dependencies": {
+    "@recent-cli/resolve-lnk": "^0.0.1-alpha.1",
     "cfb": "^1.2.0"
   }
 }
