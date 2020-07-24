@@ -4,17 +4,13 @@ const shared = require("./sharedSignatures.js");
 const lnk = require("@recent-cli/resolve-lnk");
 const decode_lnk_string = require("@recent-cli/resolve-lnk/src/decode_lnk_string.js");
 
-function entry(rawBytes, entryOffset) {
+function entry(rawBytes) {
   
   
-  let LnkFiles = [];
-  let lnkBytes = [];
-
   let bag = {};
   let rank = rawBytes.readFloatLE(4); // should be single.
   let headerType = rawBytes.readInt32LE(12);
   bag["rank"] = rank;
-  bag["headerType"] = headerType;
 
   if (headerType === 0) {
     let nameSize = rawBytes.readInt16LE(16);
@@ -42,11 +38,9 @@ function entry(rawBytes, entryOffset) {
     }
 
     lnkOffsets.push(lo);
-
     index = lo + 1; //add length so we do not hit on it again
   }
 
-  bag["lnkOffsets"] = lnkOffsets;
 
   let counter = 0;
   let max = lnkOffsets.length - 1;
@@ -63,25 +57,10 @@ function entry(rawBytes, entryOffset) {
       end = lnkOffsets[counter + 1];
     }
 
-    // var bytes = new byte[end - start]();
-    // Buffer.BlockCopy(rawBytes, start, bytes, 0, bytes.Length);
-
     let bytes = Buffer.alloc(end - start);
     bytes.set(rawBytes.subarray(start, start + bytes.length), 0);
    
-    let name = `Offset_0x${entryOffset + lnkOffset}.lnk`;
-    
-    lnkBytes.push({
-      name: name,
-      bytes: bytes,
-    });
-    
-   const lnnk__ =  lnk.resolve_lnk_basic(bytes)
-    
-    console.log("lnnk__", lnnk__);
-   
-    LnkFiles.push(lnnk__);
-    bag[name] = lnnk__;
+    bag['destination'] =  lnk.resolve_lnk_basic(bytes);
     
   }
 

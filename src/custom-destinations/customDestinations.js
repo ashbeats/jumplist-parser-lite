@@ -8,31 +8,17 @@ const { footerBytes, ByteSearch } = require("./sharedSignatures.js");
 
 const { entry } = require("./entry.js");
 
-const test_file =
-  // "../tests/customDestinations/fa9ab6619fa287bf.customDestinations-ms";
-  "../tests/customDestinations/48e4d97e866a670a.customDestinations-ms";
-
 function validate_signature(rawBytes) {
   const fileSig = rawBytes.readInt32LE(rawBytes.length - 4);
   const footerSig = footerBytes.readInt32LE(0);
   return footerSig === fileSig;
 }
 
-/**
- * CustomDestinations-ms
- * 
- Files created under \Users\<username>\AppData\Roaming\Microsoft\Windows\Recent\CustomDestinations-ms are created when a user “pins” a file to the Start Menu or Task Bar.
- 
- https://www.blackbagtech.com/blog/windows-10-jump-list-forensics/
- 
- * @param {Buffer} rawBytes
- * @param sourceFile
- */
-const getFooterOffsets = footerBytes => rawBytes => {
+const getFooterOffsets = searchFn => footerBytes => rawBytes => {
   let index = 0;
   let footerOffsets = [];
   while (index < rawBytes.length) {
-    let lo = ByteSearch(rawBytes, footerBytes, index);
+    let lo = searchFn(rawBytes, footerBytes, index);
     if (lo === -1) {
       break;
     }
@@ -44,7 +30,7 @@ const getFooterOffsets = footerBytes => rawBytes => {
 };
 
 let footerOffsetReducer = mainBytes => (
-  { chunkStart, byteChunks, absOffsets },
+  { chunkStart, byteChunks },
   footerOffset,
   i
 ) => {
@@ -54,16 +40,24 @@ let footerOffsetReducer = mainBytes => (
     mainBytes.subarray(chunkStart, chunkStart + chunkBytes.length),
     0
   );
-
-  absOffsets.push(chunkStart);
   byteChunks.push(chunkBytes);
 
   chunkStart += chunkSize;
 
-  return { chunkStart, byteChunks, absOffsets };
+  return { chunkStart, byteChunks };
 };
 
-function custom_destination(rawBytes, sourceFile) {
+/**
+ * CustomDestinations-ms
+ * 
+ Files created under \Users\<username>\AppData\Roaming\Microsoft\Windows\Recent\CustomDestinations-ms are created when a user “pins” a file to the Start Menu or Task Bar.
+ 
+ https://www.blackbagtech.com/blog/windows-10-jump-list-forensics/
+ 
+ * @param {Buffer} rawBytes
+ */
+
+function custom_destination(rawBytes) {
   // dd("not implemented yet");
   if (rawBytes.length === 0) throw "Empty file";
   if (rawBytes.length <= 24) throw "Empty custom destinations jump list";
@@ -71,25 +65,28 @@ function custom_destination(rawBytes, sourceFile) {
   // #. Validate footer signature.
   if (!validate_signature(rawBytes)) throw "Invalid signature (footer missing)";
 
-  const footerOffsets = getFooterOffsets(footerBytes)(rawBytes);
+  const footerOffsets = getFooterOffsets(ByteSearch)(footerBytes)(rawBytes);
 
-  let reduceState = { chunkStart: 0, byteChunks: [], absOffsets: [] };
-
-  const { byteChunks, absOffsets } = footerOffsets.reduce(
+  const { byteChunks } = footerOffsets.reduce(
     footerOffsetReducer(rawBytes),
-    reduceState
+    { chunkStart: 0, byteChunks: [], absOffsets: [] }
   );
 
   const entries = byteChunks
     .filter(b => b.length > 30)
-    .map((b, i) => entry(b, absOffsets[i]));
+    .map((b, i) => entry(b));
 
   return {
-    footerOffsets,
-    absOffsets,
-    byteChunks: byteChunks.length,
     entries
   };
 }
+
+/***
+ * INLINE TESTS
+ */
+
+const test_file =
+  // "../tests/customDestinations/fa9ab6619fa287bf.customDestinations-ms";
+  "../tests/customDestinations/48e4d97e866a670a.customDestinations-ms";
 
 dd(custom_destination(fs.readFileSync(test_file), test_file));
