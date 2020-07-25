@@ -1,7 +1,7 @@
 {
   "name": "@recent-cli/jumplist-parser-lite",
   "version": "0.0.1-alpha.1",
-  "description": "",
+  "description": "A safe & non-forensic, Windows Jumplist parser.",
   "main": "src/index.js",
   "directories": {
     "doc": "docs",
@@ -18,7 +18,10 @@
     "url": "git+https://github.com/ashbeats/jumplist-parser-lite.git"
   },
   "keywords": [
-    "jumplist"
+    "jumplists",
+    "automatic destination",
+    "custom destination",
+    "windows"
   ],
   "author": "",
   "license": "MIT",
