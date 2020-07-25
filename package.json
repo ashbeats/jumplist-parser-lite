@@ -19,9 +19,14 @@
   },
   "keywords": [
     "jumplists",
-    "automatic destination",
-    "custom destination",
-    "windows"
+    "parser",
+    "node",
+    "windows",    
+    "customdestinations-jump",
+    "customdestinations-ms",
+    "automaticdestinations-jump",
+    "automaticdestinations-ms",
+    "lnk-files"    
   ],
   "author": "",
   "license": "MIT",
