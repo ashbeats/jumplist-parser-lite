@@ -4,56 +4,30 @@ https://github.com/EricZimmerman/JumpList/blob/master/JumpList/Custom/CustomDest
 const lnk = require("@recent-cli/resolve-lnk");
 const fs = require("fs");
 const { dd, dump } = require("dumper.js");
-const { footerBytes, ByteSearch } = require("./sharedSignatures.js");
-const shared = require("./sharedSignatures.js");
 
-const { entry } = require("./entry.js");
+// prettier-ignore
+const footerBytes = Buffer.from([
+    0xab, 0xfb, 0xbf, 0xba
+]);
 
-function validate_signature(rawBytes) {
-  const fileSig = rawBytes.readInt32LE(rawBytes.length - 4);
-  const footerSig = footerBytes.readInt32LE(0);
-  return footerSig === fileSig;
-}
+// prettier-ignore
+const lnkHeaderBytes  = Buffer.from([ 
+    0x4C, 0x00, 0x00, 0x00,
+    0x01, 0x14, 0x02, 0x00, 
+    0x00, 0x00, 0x00, 0x00,
+    0xC0, 0x00, 0x00, 0x00, 
+    0x00, 0x00, 0x00, 0x46
+]);
 
-const getFooterOffsets = searchFn => threads => haystack => {
-  let index = 0;
-  let footerOffsets = [];
-  while (index < haystack.length) {
-    let lo = searchFn(haystack, threads, index);
-    if (lo === -1) {
-      break;
-    }
-    footerOffsets.push(lo);
-    index = lo + threads.length; //add length so we do not hit on it again
-  }
-
-  return footerOffsets;
+const signatures = {
+  footerBytes,
+  lnkHeaderBytes
 };
 
-let footerOffsetReducer = mainBytes => (
-  { chunkStart, byteChunks },
-  footerOffset,
-  i
-) => {
-  //4C 00 00 00 01 14 02 00 00 00 00 00 C0 00 00 00 00 00 00 46
-  // where the first 4 bytes are the header length and the next 16 make up our GUID.
-
-  // where the first 4 bytes are the header length and the next 16 make up our GUID.
-
-  //  If we can find the offset to each of those, we have the offsets where each lnk file starts.
-
-  // This fn receives the where each one starts:
-  // Since we know where each starts, we can then start at the first one and use the offset
-  // to the second to calculate how many bytes is in the first lnk file.
-
-  let size = footerOffset - chunkStart + 4;
-  let bytes = Buffer.alloc(size);
-  bytes.set(mainBytes.subarray(chunkStart, chunkStart + size), 0);
-  byteChunks.push(bytes);
-
-  chunkStart += size;
-
-  return { chunkStart, byteChunks };
+const validate_signature = rawBytes => {
+  const fileSig = rawBytes.readInt32LE(rawBytes.length - 4);
+  const footerSig = signatures.footerBytes.readInt32LE(0);
+  return footerSig === fileSig;
 };
 
 /**
@@ -122,141 +96,73 @@ function custom_destination(rawBytes) {
   // - Other stuff
   // Footer (Signature 0xbabffbab)
 
-  // dd("not implemented yet");
+  //
   if (rawBytes.length === 0) throw "Empty file";
   if (rawBytes.length <= 24) throw "Empty custom destinations jump list";
 
   // #. Validate footer signature.
   if (!validate_signature(rawBytes)) throw "Invalid signature (footer missing)";
 
-  // So now all a parser has to do is understand how to pull out the lnk files from  *.customDestinations-ms files and you
-  // can extract all the details contained in said lnk files using the tool of your choice.
+  // pull out the lnk files
+  return {
+    destinations: extract_all_entries(rawBytes)
+  };
+}
 
-  /*how can we know where the lnk files start and stop?
-  * 
-  * The way I process custom destination files is to look for a few unique things about lnk files amongst the sea of bytes:
-  
-  Header length: 0x4C
-  Lnk class Identifier GUID: 00021401-0000-0000-c000-000000000046
-  * 
-  One thing you might notice is that the bytes that make up the GUID aren't in the same order in the lnk file itself. Because of this, we have to look for a pattern in the bytes that looks like this:
-  
-  4C 00 00 00 01 14 02 00 00 00 00 00 C0 00 00 00 00 00 00 46
-  
-  where the first 4 bytes are the header length and the next 16 make up our GUID.
-  
-  If we can find the offset to each of those, we have the offsets where each lnk file starts. 
+/*how can we know where the lnk files start and stop?
+ * 
+ * The way I process custom destination files is to look for a few unique things about lnk files amongst the sea of bytes:
  
-  * Since we know where each starts, we can then start at the first one and use the offset to the second to calculate 
-    how many bytes is in the first lnk file. 
-    
-  * This works fine until we get to the last one. For this one, we need to find the offset to the footer and use this
-     offset along with the starting offset of the last lnk file to find the number of bytes in the last lnk file.
-  
-  * 
-  * */
+ Header length: 0x4C
+ Lnk class Identifier GUID: 00021401-0000-0000-c000-000000000046
+ * 
+ One thing you might notice is that the bytes that make up the GUID aren't in the same order in the lnk file itself. Because of this, we have to look for a pattern in the bytes that looks like this:
+ 
+ 4C 00 00 00 01 14 02 00 00 00 00 00 C0 00 00 00 00 00 00 46
+ 
+ where the first 4 bytes are the header length and the next 16 make up our GUID.
+ 
+ If we can find the offset to each of those, we have the offsets where each lnk file starts. 
 
-  // const footerOffsets = getFooterOffsets(ByteSearch)(footerBytes)(rawBytes);
-  let searchFn = ByteSearch;
-  let chunkToFind = footerBytes;
-  let haystack = rawBytes;
-
-  let index = 0;
-  let footerOffsets = [];
-  while (index < haystack.length) {
-    // OFFSETS_WHERE_EACH_LNK_FILE_STARTS
-    // find the starting position of each lnk entry
-    // 4C 00 00 00 01 14 02 00 00 00 00 00 C0 00 00 00 00 00 00 46
-    // where the first 4 bytes are the header length and the next 16 make up our GUID.
-    let haystackPos = searchFn(haystack, chunkToFind, index);
-    if (haystackPos === -1) {
-      break;
-    }
-    footerOffsets.push(haystackPos);
-    index = haystackPos + chunkToFind.length; //add length so we do not hit on it again
-  }
-
-  // i fucking love Node.Buffer. Now the hype makes sense to me. This is the power.
-  dump(["haystack.length", haystack.length]);
-  // then get the first position.
-
-  // now search
+ * Since we know where each starts, we can then start at the first one and use the offset to the second to calculate 
+   how many bytes is in the first lnk file. 
+   
+ * This works fine until we get to the last one. For this one, we need to find the offset to the footer and use this
+    offset along with the starting offset of the last lnk file to find the number of bytes in the last lnk file.
+ 
+ * 
+ * */
+function extract_all_entries(haystack) {
   let x = 0;
-  while (x < 5) {
+  let max = 10;
+  let entries = [];
+  while (x < max) {
     x++;
-    let start = haystack.indexOf(shared.lnkHeaderBytes);
 
+    // if last_footer is not found, something is wrong. Might have overshot.
+    const last_footer = haystack.lastIndexOf(signatures.footerBytes);
+    if (!last_footer) break;
+
+    // find the starting pos of lnk header signature
+    const start = haystack.indexOf(signatures.lnkHeaderBytes);
     if (start === -1) break;
 
-    let last_footer = haystack.lastIndexOf(shared.footerBytes);
-    let end = haystack.indexOf(shared.footerBytes);
-
+    // find the last pos of footer signature (there are many footers in the file. We all them footer, because the sig is stored at the end of the file)
+    let end = haystack.indexOf(signatures.footerBytes);
     if (end === 0) end = last_footer;
+    if (end === -1) break;
 
+    // get the region we found.
     let slice = haystack.subarray(start, end);
 
-    let tried;
-     // tried = entry(slice);
-     
-    tried =  lnk.resolve_lnk_basic(slice)
-    
-    
-    // haystack = haystack.fill(0, start, end);
+    // Found it.
+    entries.push(lnk.resolve_lnk_basic(slice));
 
-    // get the next bytes
+    // Only keep the rest of the file.
     haystack = haystack.subarray(end);
-
-    dump([
-      "match",
-      {
-        start,
-        end,
-        slice_len: slice.length,
-        last_footer,
-        tried: tried
-      }
-    ]);
   }
 
-  /* let lnkChunks = [];
-  let chunkStart = 0;
-  let matchIndex = haystack.indexOf(chunkToFind); // 1928
-  let size = matchIndex - chunkStart + 4;
-  // footerOffset + 4
-  let bytes = Buffer.alloc(size);
-
-  let cp = haystack.subarray(0, 0 + size);
-  let cp2 = haystack.subarray(matchIndex + 4, 0 + size);
-
-  bytes.set(
-    /!* this is why he has to filter > 30 *!/
-    cp,
-    0
-  );
-
-  // alt method: copy, fill that with 0 in the source, and continue;
-
-  lnkChunks.push(bytes);
-
-  chunkStart += size;
-
-  return { chunkStart, byteChunks };*/
-
-  return;
-
-  // return footerOffsets;
-
-  const { byteChunks } = footerOffsets.reduce(footerOffsetReducer(rawBytes), {
-    chunkStart: 0,
-    byteChunks: [],
-    absOffsets: []
-  });
-
-  const entries = byteChunks.filter(b => b.length > 30).map((b, i) => entry(b));
-
-  return {
-    entries
-  };
+  return entries;
 }
 
 /***

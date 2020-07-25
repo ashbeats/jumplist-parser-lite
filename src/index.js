@@ -9,4 +9,6 @@ convert entries
       // Entries.add(path.dirname(dest_entry));
     }
  */
+
+// todo - detect if custom or automatic list and handle transparently.
 module.exports = extract_dest_entries;
