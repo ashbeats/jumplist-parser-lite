@@ -1,7 +1,5 @@
-
-
+'use strict';
 const CFB = require("cfb");
-
 
 const unpack_destlist_content = require("./unpack_destlist_content.js");
 
@@ -19,5 +17,5 @@ function automatic_destination_parser(bytes) {
 
 
 
-module.exports = automatic_destination_parser
+module.exports = automatic_destination_parser;
 
