@@ -1,6 +1,7 @@
 
 
-const extract_dest_entries  = require("./automatic-destinations/extract_dest_entries.js")
+const automatic_destination_parser  = require("./automatic-destinations/automatic_destination_parser.js")
+const custom_destination_parser  = require("./custom-destinations/custom_destinations.js")
 
 
 /*
@@ -11,4 +12,14 @@ convert entries
  */
 
 // todo - detect if custom or automatic list and handle transparently.
-module.exports = extract_dest_entries;
+
+const defaults = {
+    /* set this to null to retrieve all types of destinations, or pass your own filter */
+    filter: /^[\w]:\\/m,
+}
+
+
+module.exports = {
+    automatic_destination_parser,
+    custom_destination,
+};
