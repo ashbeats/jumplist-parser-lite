@@ -1,5 +1,3 @@
-
-
 # Jumplist Parser Lite
 
 A safe & non-forensic, Jumplist parser.
@@ -7,13 +5,11 @@ A safe & non-forensic, Jumplist parser.
 JumpList Parser Lite has only one goal - **Find all unique paths inside jumplists.** 
 
 
-
 ## Installation
 
 ```bash
 yarn add @recent-cli/jumplist-parser-lite
 ```
-
 
 
 ## Usage
@@ -28,8 +24,6 @@ const array_of_destinations = automatic_destination_parser(bytes);
 console.log(array_of_destinations);
 ```
 
-
-
 For Custom destination files
 
 ```javascript
@@ -40,10 +34,7 @@ const array_of_destinations = custom_destination_parser(bytes);
 console.log(array_of_destinations);
 ```
 
-
-
 See `tests/` for more usage information. 
-
 
 
 ## So, What are Jumplists?
@@ -54,7 +45,6 @@ Jump Lists come in 2 main types:
 
 - automatic (autodest, or *.automaticDestinations-ms) files
 - custom (custdest, or *.customDestinations-ms) files
-
 
 
 ## Reason for this package
@@ -77,8 +67,5 @@ If you are looking for a forensic parser, I recommend [Eric Zimmerman's awesome 
 
 - [Forensics Wiki On Jumplists](https://web.archive.org/web/20190829145904/http://forensicswiki.org/wiki/Jump_Lists)
 - [Jump lists in depth (includes changes from Windows 10)](https://web.archive.org/web/20190829145904/http://binaryforay.blogspot.com/2016/02/jump-lists-in-depth-understand-format.html), by [Eric Zimmerman](https://github.com/EricZimmerman)
-
-
-
 
 
