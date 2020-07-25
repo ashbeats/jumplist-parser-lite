@@ -24,7 +24,7 @@ function setup_helpers() {
         __dirname +
           "/samples/automaticDestinations/f01b4d95cf55d32a.automaticDestinations-ms"
       ),
-      expected: ["C:\\", "C:\\Temp", "C:\\Users\\e"]
+      expected: ["C:\\Temp", "C:\\Temp\\1", "C:\\", "C:\\Users\\e\\Desktop"]
     }
   ];
 
@@ -35,8 +35,8 @@ describe("Automatic Destination Parser", () => {
   const inputs = setup_helpers();
 
   test("parse and extract multiple destinations", () => {
-    expect(automatic_destination_parser(inputs[2].input)).toMatchObject(
-      inputs[2].expected
+    expect(automatic_destination_parser(inputs[2].input)).toEqual(
+      expect.arrayContaining(inputs[2].expected)
     );
   });
 
@@ -45,19 +45,17 @@ describe("Automatic Destination Parser", () => {
       "Input must be an instance of Buffer"
     );
   });
-  
 
   test("throws when header mismatch", () => {
     expect(() => automatic_destination_parser(Buffer.alloc(1024))).toThrow(
       "Header Signature: Expected d0cf11e0a1b11ae1 saw 0000000000000000"
     );
   });
-  
 
   test("parse and extract undefined destinations", () => {
     expect(automatic_destination_parser(inputs[0].input)).toBeUndefined();
   });
-  
+
   test("parse and extract empty destinations", () => {
     expect(automatic_destination_parser(inputs[1].input)).toMatchObject([]);
   });

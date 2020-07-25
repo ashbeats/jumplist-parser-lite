@@ -32,10 +32,12 @@ module.exports = function unpack_destlist_content(raw) {
     EntryBytes1.set(raw.subarray(index, index + entrySize), 0);
 
     const dest_entry = extract_path_from_dest_list_entry(EntryBytes1);
+    
+    // only add paths on the filesystem. 
     if (/^[\w]:\\/m.test(dest_entry)) {
-      Entries.add(path.dirname(dest_entry));
-    }
-    // Entries.add(path.dirname(dest_entry));
+      Entries.add(dest_entry);
+    }   
+    
     index += entrySize;
   }
 
