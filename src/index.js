@@ -1,12 +1,9 @@
+'use strict';
 
+const automatic_destination_parser  = require("./automatic-destinations/automatic_destination_parser.js")
+const custom_destination_parser  = require("./custom-destinations/custom_destinations.js")
 
-const extract_dest_entries  = require("./automatic-destinations/extract_dest_entries.js")
-
-
-/*
-convert entries 
-    if (/^[\w]:\\/m.test(dest_entry)) {
-      // Entries.add(path.dirname(dest_entry));
-    }
- */
-module.exports = extract_dest_entries;
+module.exports = {
+    automatic_destination_parser,
+    custom_destination_parser,
+};
