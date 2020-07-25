@@ -1,125 +1,84 @@
-# THIS README WILL NOT MAKE SENSE UNTIL V1.0.0. 
-
-# REALLY, IT WILL NOT. 
-
--------------------------------------
 
 
-# jumplist-parser-lite
+# Jumplist Parser Lite
 
-https://web.archive.org/web/20190829145904/http://forensicswiki.org/wiki/Jump_Lists
+A safe & non-forensic, Jumplist parser.
+
+JumpList Parser Lite has only one goal - **Find all unique paths inside jumplists.** 
 
 
 
-# Resources
+## Installation
 
-https://binaryforay.blogspot.com/2016/02/jump-lists-in-depth-understand-format.html
+```bash
+yarn add @recent-cli/jumplist-parser-lite
+```
 
-[Jump lists in depth (includes changes from Windows 10)](https://web.archive.org/web/20190829145904/http://binaryforay.blogspot.com/2016/02/jump-lists-in-depth-understand-format.html), by [Eric Zimmerman](https://web.archive.org/web/20190829145904/http://forensicswiki.org/wiki/Eric_Zimmerman), Feb 2016
+
+
+## Usage
+
+For Automatic destination files
+
+```javascript
+const { automatic_destination_parser } = require("@recent-cli/jumplist-parser-lite");
+
+// bytes should contain a Buffer containing the target file. 
+const array_of_destinations = automatic_destination_parser(bytes);
+console.log(array_of_destinations);
+```
 
 
 
-## Jump Lists
+For Custom destination files
 
-Jump Lists are a new Windows 7 Taskbar feature that gives the user quick access to recently accessed application files and actions.
+```javascript
+const { custom_destination_parser } = require("@recent-cli/jumplist-parser-lite");
 
-Jump Lists come in multiple flavors:
+// bytes should contain a Buffer containing the target file. 
+const array_of_destinations = custom_destination_parser(bytes);
+console.log(array_of_destinations);
+```
+
+
+
+See `tests/` for more usage information. 
+
+
+
+## So, What are Jumplists?
+
+Jump Lists are a Windows feature that gives the user quick access to recently accessed application files and actions.
+
+Jump Lists come in 2 main types:
 
 - automatic (autodest, or *.automaticDestinations-ms) files
 - custom (custdest, or *.customDestinations-ms) files
-- Explorer StartPage2 ProgramsCache Registry values
-
-### AutomaticDestinations
-
-The AutomaticDestinations Jump List files are located in the user profile path:
-
-Path: C:\Users\%USERNAME%\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations
-
-Files: *.automaticDestinations-ms
-
-#### Structure
-
-The AutomaticDestinations Jump List files are [OLE Compound Files](https://web.archive.org/web/20190829145904/http://forensicswiki.org/wiki/OLE_Compound_File) containing multiple streams of which:
-
-- hexadecimal numbered, e.g. "1a"
-- DestList
-
-Each of the hexadecimal numbered streams contains data similar of that of a [Windows Shortcut (LNK)](https://web.archive.org/web/20190829145904/http://forensicswiki.org/wiki/LNK). One could extract all the streams and analyze them individually with a LNK parser.
-
-The "DestList" stream acts as a most recently/frequently used (MRU/MFU) list. This stream consists of a 32-byte header, followed by the various structures that correspond to each of the individual numbered streams. Each of these structures is 114 bytes in size, followed by a variable length Unicode string. The first 114 bytes of the structure contains the following information at the corresponding offsets:
-
-| Offset |   Size   |                         Description                          |
-| :----: | :------: | :----------------------------------------------------------: |
-|  0x48  | 16 bytes |  NetBIOS name of the system; padded with zeros to 16 bytes   |
-|  0x58  | 8 bytes  | Stream number; corresponds to the numbered stream within the jump list |
-|  0x64  | 8 bytes  | Last modification time, contains a [FILETIME](https://web.archive.org/web/20190829145904/http://msdn2.microsoft.com/en-us/library/ms724284.aspx) structure |
-|  0x70  | 2 bytes  | Path string size, the number of characters (UTF-16 words) of the path string |
-|  0x72  |   ...    |                         Path string                          |
-
-### CustomDestinations
-
-The CustomDestinations Jump List files are located in the user profile path:
-
-Path: C:\Users\%USERNAME%\AppData\Roaming\Microsoft\Windows\Recent\CustomDestinations
-
-Files: *.customDestinations-ms
-
-#### Structure
-
-CustomDestinations Jump List files reportedly follow a structure of sequential [MS-SHLLINK](https://web.archive.org/web/20190829145904/http://msdn.microsoft.com/en-us/library/dd871305(v=prot.13).aspx:) binary format segments.
-
----------------
-
-from eric's blog
-
----
-
-# Custom destinations
-
-One way a custom destination file (*.customDestinations-ms) is created is when a user pins an item in a jump list. Harlan [spoke](http://windowsir.blogspot.com/2011/12/jump-list-analysis.html) of this way back in 2011.
-
-They can be found in the following directory:
-
-C:\Users\<UserProfile>\AppData\Roaming\Microsoft\Windows\Recent\CustomDestinations
-
-A custom destination jump list file generally looks like this internally:
-
-- Header
-- Series of lnk files concatenated together
-- (Possibly other data structures in there)
-- Footer (Signature 0xbabffbab)
-
-As an example of one kind of custom destination jump list, here is what one looks like in a hex editor with the relevant parts highlighted.
-
-The purple at the top is the header, next is the first lnk file in pink (or is that salmon?), and finally, the beginning of the next lnk file is in green.
-
-[![img](https://2.bp.blogspot.com/-GXggcTWt5TM/Vs3261A_QkI/AAAAAAAACYY/dSCVfbIjBhc/s1600/customHex.jpg)](http://2.bp.blogspot.com/-GXggcTWt5TM/Vs3261A_QkI/AAAAAAAACYY/dSCVfbIjBhc/s1600/customHex.jpg)
-
-At the very bottom of the file is the footer:
-
-[![img](https://3.bp.blogspot.com/-9PHQ-vBEIBY/Vs31hCzfTVI/AAAAAAAACYM/RRpdD2GXhkg/s1600/customfooter.jpg)](http://3.bp.blogspot.com/-9PHQ-vBEIBY/Vs31hCzfTVI/AAAAAAAACYM/RRpdD2GXhkg/s1600/customfooter.jpg)
-
-If we carve out the bytes in pink and save them to a file, we can use LECmd to process it, like this:
-
-So now all a parser has to do is understand how to pull out the lnk files from  *.customDestinations-ms files and you can extract all the details contained in said lnk files using the tool of your choice.
 
 
 
-## Nice, but how can we know where the lnk files start and stop? 
+## Reason for this package
 
-It would have been nice if each was prefixed with the number of bytes so that we could read that size and then read that number of bytes. Alas, this is just a dream.
+##### Pure NodeJS parser & non-forensic use case
 
-The way I process custom destination files is to look for a few unique things about lnk files amongst the sea of bytes:
+I wanted something that could be included in packages that does not raise privacy concerns and auto flagging by vulnerability scanner bots, like my `@recent-cli` tool. Also, relying on compiled libraries was not ideal for my use case.
 
-- Header length: 0x4C
-- Lnk class Identifier GUID: 00021401-0000-0000-c000-000000000046
+Unlike forensic Jumplist parsers which seek to identify and extract all meta-data that can be used to infer user's activity and patterns, *<u>No user identifiable information is returned</u>* from **JumpList Parser Lite**. Only destinations.
 
-One thing you might notice is that the bytes that make up the GUID aren't in the same order in the lnk file itself. Because of this, we have to look for a pattern in the bytes that looks like this:
+Don't get me wrong. 
 
-4C 00 00 00 01 14 02 00 00 00 00 00 C0 00 00 00 00 00 00 46
+Forensic tools have a place, just not in widely used *non-forensic* open-source packages. 
 
-where the first 4 bytes are the header length and the next 16 make up our GUID. 
+If you are looking for a forensic parser, I recommend [Eric Zimmerman's awesome JLECmd](https://github.com/EricZimmerman/JLECmd). It's a great tool for researchers and security consultants. (I can't thank Eric's code enough. It helped me to write this parser)
 
-If we can find the offset to each of those, we have the offsets where each lnk file starts. Since we know where each starts, we can then start at the first one and use the offset to the second to calculate how many bytes is in the first lnk file. This works fine until we get to the last one. For this one, we need to find the offset to the footer and use this offset along with the starting offset of the last lnk file to find the number of bytes in the last lnk file.
 
-And that is how custom destination jump lists are stored on disk. 
+
+## References
+
+- [Forensics Wiki On Jumplists](https://web.archive.org/web/20190829145904/http://forensicswiki.org/wiki/Jump_Lists)
+- [Jump lists in depth (includes changes from Windows 10)](https://web.archive.org/web/20190829145904/http://binaryforay.blogspot.com/2016/02/jump-lists-in-depth-understand-format.html), by [Eric Zimmerman](https://github.com/EricZimmerman)
+
+
+
+
+
