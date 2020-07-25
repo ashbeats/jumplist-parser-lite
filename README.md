@@ -4,6 +4,7 @@ A safe & non-forensic, Jumplist parser.
 
 JumpList Parser Lite has only one goal - **Find all unique paths inside jumplists.** 
 
+![CI](https://github.com/ashbeats/jumplist-parser-lite/workflows/CI/badge.svg?branch=master&event=push)
 
 ## Installation
 
