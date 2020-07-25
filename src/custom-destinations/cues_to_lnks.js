@@ -1,13 +1,18 @@
 const lnk = require("@recent-cli/resolve-lnk");
 
-/*how can we know where the lnk files start and stop?
- * 
- * The way I process custom destination files is to look for a few unique things about lnk files amongst the sea of bytes:
+/*
+
+ how can we know where the lnk files start and stop?
+
+ look for a few unique things about lnk files amongst the sea of bytes:
  
  Header length: 0x4C
  Lnk class Identifier GUID: 00021401-0000-0000-c000-000000000046
  * 
- One thing you might notice is that the bytes that make up the GUID aren't in the same order in the lnk file itself. Because of this, we have to look for a pattern in the bytes that looks like this:
+ One thing you might notice is that the bytes that make up the GUID
+ * aren't in the same order in the lnk file itself. 
+ * 
+ * Because of this, we have to look for a pattern in the bytes that looks like this:
  
  4C 00 00 00 01 14 02 00 00 00 00 00 C0 00 00 00 00 00 00 46
  
@@ -23,10 +28,7 @@ const lnk = require("@recent-cli/resolve-lnk");
  
  * 
  * */
-
-
-
-const cues_to_lnks = cues => /* @var {Buffer} */ haystack => {
+const cues_to_lnks = cues => /* {Buffer} */ haystack => {
   let x = 0;
   let max = 10;
   let entries = [];

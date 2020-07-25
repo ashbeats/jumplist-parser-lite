@@ -1,15 +1,5 @@
-/* 
-https://github.com/EricZimmerman/JumpList/blob/master/JumpList/Custom/CustomDestination.cs
- */
-
 const cues_to_lnks = require("./cues_to_lnks.js");
 const cues = require("./cues.js");
-
-const compare_with_fixed_cues = cues => rawBytes => {
-  const fileSig = rawBytes.readInt32LE(rawBytes.length - 4);
-  const footerSig = cues.footerBytes.readInt32LE(0);
-  return footerSig === fileSig;
-};
 
 /**
 Files created under \Users\<username>\AppData\Roaming\Microsoft\Windows\Recent\CustomDestinations-ms are created when a user “pins” a file to the Start Menu or Task Bar.
@@ -24,13 +14,19 @@ Custom destinations
 One way a custom destination file (*.customDestinations-ms) is created is when a user pins an item in a jump list. 
 
 They can be found in the following directory:
-C:\Users\<UserProfile>\AppData\Roaming\Microsoft\Windows\Recent\CustomDestinations
+C:\Users\%USER%\AppData\Roaming\Microsoft\Windows\Recent\CustomDestinations
 */
+
+const compare_with_fixed_cues = cues => bytes => {
+  const fileSig = bytes.readInt32LE(bytes.length - 4);
+  const footerSig = cues.footerBytes.readInt32LE(0);
+  return footerSig === fileSig;
+};
 
 /**
  *
- * @param cues
- * @returns {function(*=): {destinations: []}}
+ * @param {Object} cues
+ * @returns {function(Buffer): {destinations: []}}
  */
 function custom_destination_parser(cues) {
   //A custom destination jump list file generally looks like this internally:
@@ -38,30 +34,20 @@ function custom_destination_parser(cues) {
   // - Header
   // -  Series of lnk files concatenated together
   // - Other stuff
-  // Footer (Signature 0xbabffbab)
+  // - Footer (Signature 0xbabffbab)
 
   const extract = cues_to_lnks(cues);
   const isValid = compare_with_fixed_cues(cues);
 
-  /**
-   *
-   * @param {Buffer} rawBytes
-   * @returns {{destinations: []}}
-   */
-  const parser = rawBytes => {
-    if (rawBytes.length === 0) throw "Empty file";
-    if (rawBytes.length <= 24) throw "Empty custom destinations jump list";
+  return bytes => {
+    if (!(bytes instanceof Buffer)) throw "Input must be an instance of Buffer";
+    if (bytes.length === 0) throw "Empty file";
+    if (bytes.length <= 24) throw "Empty custom destinations jump list";
+    if (!isValid(bytes)) throw "Invalid signature (footer missing)";
 
-    // #. Validate footer signature.
-    if (!isValid(rawBytes)) throw "Invalid signature (footer missing)";
-
-    // pull out the lnk files
-    return {
-      destinations: extract(rawBytes)
-    };
+    // pull out the unique destinations
+    return [...new Set(extract(bytes))]
   };
-
-  return parser;
 }
 
 /***
