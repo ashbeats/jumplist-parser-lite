@@ -21,5 +21,5 @@ const defaults = {
 
 module.exports = {
     automatic_destination_parser,
-    custom_destination,
+    custom_destination_parser,
 };
