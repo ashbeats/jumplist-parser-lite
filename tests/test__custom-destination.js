@@ -1,4 +1,4 @@
-const { custom_destination_parser } = require("../src/index.js");
+const { custom_destination_parser } = require("../dist/index.js");
 
 const path = require("path");
 const fs = require("fs");
