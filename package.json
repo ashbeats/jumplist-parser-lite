@@ -11,7 +11,8 @@
   },
   "scripts": {
     "build": "npx webpack --config webpack.config.js",
-    "test": "npx webpack --config webpack.config.js && jest"
+    "test": "jest",
+    "test-dev": "npx webpack --config webpack.config.js && jest"
   },
   "directories": {
     "doc": "docs",
