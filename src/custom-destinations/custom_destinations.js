@@ -34,4 +34,4 @@ function custom_destination_parser(cues) {
   };
 }
 
-module.exports = custom_destination_parser(cues);
+module.exports =  custom_destination_parser(cues);

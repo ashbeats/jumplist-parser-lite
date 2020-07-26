@@ -15,7 +15,4 @@ function automatic_destination_parser(bytes) {
   }
 }
 
-
-
 module.exports = automatic_destination_parser;
-

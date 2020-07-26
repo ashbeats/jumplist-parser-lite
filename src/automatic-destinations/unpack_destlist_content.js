@@ -5,13 +5,12 @@ const extract_path_from_dest_list_entry = require("./extract_path_from_dest_list
 
 const path = require("path");
 
-
 /**
- * 
+ *
  * @param {Buffer} raw
  * @returns {unknown[]}
  */
-module.exports = function unpack_destlist_content(raw) {
+function unpack_destlist_content(raw) {
   const headerBytes = Buffer.alloc(32);
   headerBytes.set(raw.subarray(0, 32), 0);
   const Header = destlist_header(headerBytes);
@@ -32,14 +31,16 @@ module.exports = function unpack_destlist_content(raw) {
     EntryBytes1.set(raw.subarray(index, index + entrySize), 0);
 
     const dest_entry = extract_path_from_dest_list_entry(EntryBytes1);
-    
-    // only add paths on the filesystem. 
+
+    // only add paths on the filesystem.
     if (/^[\w]:\\/m.test(dest_entry)) {
       Entries.add(dest_entry);
-    }   
-    
+    }
+
     index += entrySize;
   }
 
   return [...Entries];
-};
+}
+
+module.exports = unpack_destlist_content;
