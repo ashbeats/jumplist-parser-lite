@@ -1,6 +1,6 @@
 {
   "name": "@recent-cli/jumplist-parser-lite",
-  "version": "0.0.1-alpha.2",
+  "version": "0.0.1",
   "description": "A safe & non-forensic, Windows Jumplist parser.",
   "main": "dist/index.js",
   "files": [
@@ -11,8 +11,8 @@
   },
   "scripts": {
     "build": "npx webpack --config webpack.config.js",
-    "test": "jest",
-    "test-dev": "npx webpack --config webpack.config.js && jest"
+    "test-src": "jest",
+    "test": "npx webpack --config webpack.config.js && jest"
   },
   "directories": {
     "doc": "docs",
@@ -49,7 +49,7 @@
     "webpack-node-externals": "^2.5.0"
   },
   "dependencies": {
-    "@recent-cli/resolve-lnk": "^0.0.1-alpha.1",
+    "@recent-cli/resolve-lnk": "^0.0.2",
     "cfb": "^1.2.0"
   }
 }

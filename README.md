@@ -1,6 +1,6 @@
 # Jumplist Parser Lite
 
-A safe & non-forensic, Jumplist parser.
+A safe, tiny (3.2 Kib), pure JS, Jumplist parser.
 
 JumpList Parser Lite has only one goal - **Find all unique paths inside jumplists.** 
 
