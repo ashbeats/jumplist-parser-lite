@@ -25,7 +25,7 @@ const cues_to_lnks = cues => /* {Buffer} */ haystack => {
     let slice = haystack.subarray(start, end);
 
     // Found it.
-    entries.push(lnk.resolve_lnk_basic(slice));
+    entries.push(lnk.resolveBuffer(slice));
 
     // Only keep the rest of the file.
     haystack = haystack.subarray(end);
