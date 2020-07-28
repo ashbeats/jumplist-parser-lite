@@ -463,10 +463,10 @@
     "@types/yargs" "^15.0.0"
     chalk "^4.0.0"
 
-"@recent-cli/resolve-lnk@^0.0.1-alpha.1":
-  version "0.0.1-alpha.1"
-  resolved "https://registry.yarnpkg.com/@recent-cli/resolve-lnk/-/resolve-lnk-0.0.1-alpha.1.tgz#06ce2cf643b4abe84a485aa8694e968c86254833"
-  integrity sha512-kItzOiBuuSjg5Sd8S+iykaY6Sne0NS6inlXwGlBn9zUMuaibxa5Tsvu4SXZiALPYqBoWZc6wB22imah7fMSw1Q==
+"@recent-cli/resolve-lnk@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@recent-cli/resolve-lnk/-/resolve-lnk-0.0.2.tgz#294568897cb7b64796217cc8ebb6fe7a0b60cf3a"
+  integrity sha512-Pa5HKz+6Hxb+CLz5aOlgPwlYvDxmRMQlH1d2IQAk71E9j8ta3rjE4qhYogvqHyw1sHIKmGkvX7/BMU7W+RVQJw==
 
 "@sinonjs/commons@^1.7.0":
   version "1.8.1"
